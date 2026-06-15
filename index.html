@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMT Enterprises - Professional Invoice & Delivery Challan System</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="print-styles.css">
+</head>
+<body>
+
+<div class="container">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🔺</div>
+      <div>
+        <h1>SMT</h1>
+        <p>Enterprises</p>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Main</div>
+      <div class="nav-item active" onclick="switchScreen('home')"><span class="nav-icon">🏠</span><span>Dashboard</span></div>
+      <div class="nav-item" onclick="switchScreen('challans')"><span class="nav-icon">📋</span><span>Challans</span></div>
+      <div class="nav-item" onclick="switchScreen('invoices')"><span class="nav-icon">🧾</span><span>Invoices</span></div>
+      <div class="nav-item" onclick="switchScreen('items')"><span class="nav-icon">📦</span><span>Items</span></div>
+      <div class="nav-item" onclick="switchScreen('customers')"><span class="nav-icon">👥</span><span>Customers</span></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">More</div>
+      <div class="nav-item" onclick="switchScreen('reports')"><span class="nav-icon">📊</span><span>Reports</span></div>
+      <div class="nav-item" onclick="switchScreen('export')"><span class="nav-icon">📥</span><span>Export</span></div>
+      <div class="nav-item" onclick="switchScreen('settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <div class="header-top">
+        <div class="header-title">
+          <h2 id="page-title">🔺 SMT Enterprises Dashboard</h2>
+          <p id="page-subtitle">Professional Invoicing & Delivery Challan System</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- HOME SCREEN -->
+      <div class="screen active" id="home">
+        <div style="background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%); color: white; padding: 32px; border-radius: 16px; margin-bottom: 32px; box-shadow: 0 8px 24px rgba(37,99,235,0.3);">
+          <h2 style="font-size: 28px; font-weight: 800; margin-bottom: 12px;">🔺 SMT Enterprises</h2>
+          <p style="font-size: 14px; opacity: 0.9; line-height: 1.8;">Professional Invoice & Delivery Challan Management System | GSTIN: 33AAACE4784E1ZU | Phone: 9025024755</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">💰 Total Revenue</div>
+            <div class="stat-value" id="total-revenue">₹0</div>
+            <div class="stat-meta" id="total-invoices">0 invoices</div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-label">✅ Paid</div>
+            <div class="stat-value" id="paid-amount">₹0</div>
+            <div class="stat-meta" id="paid-count">0 invoices</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-label">⏳ Pending</div>
+            <div class="stat-value" id="pending-amount">₹0</div>
+            <div class="stat-meta" id="pending-count">0 invoices</div>
+          </div>
+          <div class="stat-card danger">
+            <div class="stat-label">📋 Total Challans</div>
+            <div class="stat-value" id="total-challans">0</div>
+            <div class="stat-meta" id="challan-count">0 created</div>
+          </div>
+        </div>
+
+        <div style="background: white; padding: 28px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+          <h3 style="margin-bottom: 24px; font-size: 18px; font-weight: 700; letter-spacing: -0.4px;">Recent Challans</h3>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Challan No</th>
+                <th>Bill To</th>
+                <th>Items</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="recent-challans">
+              <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-secondary);">No challans yet. Create one now!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHALLANS SCREEN -->
+      <div class="screen" id="challans">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px;">
+          <h3 style="font-size: 20px; font-weight: 800; letter-spacing: -0.6px;">Delivery Challans</h3>
+          <button class="btn btn-primary" onclick="openModal('challanModal')">+ Create Challan</button>
+        </div>
+        <input type="text" class="form-input" id="search-challan" placeholder="Search by challan no or customer..." onkeyup="filterChallans()" style="margin-bottom: 22px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Challan No</th>
+              <th>Bill To</th>
+              <th>Items</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="challans-table">
+            <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-secondary);">No challans</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- INVOICES SCREEN -->
+      <div class="screen" id="invoices">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px;">
+          <h3 style="font-size: 20px; font-weight: 800; letter-spacing: -0.6px;">All Invoices</h3>
+          <button class="btn btn-primary" onclick="openModal('invoiceModal')">+ Create Invoice</button>
+        </div>
+        <input type="text" class="form-input" id="search-invoice" placeholder="Search by invoice no or customer..." onkeyup="filterInvoices()" style="margin-bottom: 22px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Invoice No</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="invoices-table">
+            <tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">No invoices</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ITEMS SCREEN -->
+      <div class="screen" id="items">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px;">
+          <h3 style="font-size: 20px; font-weight: 800; letter-spacing: -0.6px;">Item Master</h3>
+          <div style="display: flex; gap: 14px;">
+            <button class="btn btn-primary" onclick="openModal('addItemModal')">+ Add Item</button>
+            <button class="btn btn-secondary" onclick="openModal('uploadModal')">📤 Upload Excel</button>
+          </div>
+        </div>
+        <input type="text" class="form-input" id="search-item" placeholder="Search items..." onkeyup="filterItems()" style="margin-bottom: 22px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Price (₹)</th>
+              <th>Unit</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="items-table">
+            <tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">No items added yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CUSTOMERS SCREEN -->
+      <div class="screen" id="customers">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px;">
+          <h3 style="font-size: 20px; font-weight: 800; letter-spacing: -0.6px;">Customers</h3>
+          <button class="btn btn-primary" onclick="openModal('addCustomerModal')">+ Add Customer</button>
+        </div>
+        <input type="text" class="form-input" id="search-customer" placeholder="Search customers..." onkeyup="filterCustomers()" style="margin-bottom: 22px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>GST No</th>
+              <th>Invoices</th>
+              <th>Total Billed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="customers-table">
+            <tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">No customers added yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- REPORTS SCREEN -->
+      <div class="screen" id="reports">
+        <h3 style="margin-bottom: 26px; font-size: 20px; font-weight: 800; letter-spacing: -0.6px;">📊 Business Reports & Analytics</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Monthly Revenue</div>
+            <div class="stat-value" id="monthly-revenue">₹0</div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-label">Collection Rate</div>
+            <div class="stat-value" id="collection-rate">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-value" id="total-customers">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Items</div>
+            <div class="stat-value" id="total-items">0</div>
+          </div>
+        </div>
+
+        <div style="background: white; padding: 28px; border-radius: 14px; margin-top: 26px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+          <h4 style="margin-bottom: 26px; font-size: 16px; font-weight: 700;">💰 Revenue Breakdown</h4>
+          <div id="revenue-chart" style="height: 300px; display: flex; align-items: flex-end; gap: 28px; justify-content: space-around;"></div>
+        </div>
+
+        <div style="background: white; padding: 28px; border-radius: 14px; margin-top: 26px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+          <h4 style="margin-bottom: 24px; font-size: 16px; font-weight: 700;">👑 Top Customers</h4>
+          <table class="table">
+            <thead>
+              <tr><th>Customer</th><th>Invoices</th><th>Total Revenue</th></tr>
+            </thead>
+            <tbody id="top-customers">
+              <tr><td colspan="3" style="text-align: center; padding: 30px; color: var(--text-secondary);">No data yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EXPORT SCREEN -->
+      <div class="screen" id="export">
+        <h3 style="margin-bottom: 26px; font-size: 20px; font-weight: 800; letter-spacing: -0.6px;">📥 Export Your Data</h3>
+        <div style="background: white; padding: 28px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 26px;">
+            <button class="btn btn-primary" onclick="exportChallansCSV()">📋 Export Challans</button>
+            <button class="btn btn-primary" onclick="exportInvoicesCSV()">📄 Export Invoices</button>
+            <button class="btn btn-primary" onclick="exportItemsCSV()">📦 Export Items</button>
+            <button class="btn btn-primary" onclick="exportCustomersCSV()">👥 Export Customers</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Report</button>
+            <button class="btn btn-danger" onclick="if(confirm('Export backup?')) downloadJSON()">💾 Backup</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS SCREEN -->
+      <div class="screen" id="settings">
+        <h3 style="margin-bottom: 26px; font-size: 20px; font-weight: 800; letter-spacing: -0.6px;">⚙️ Settings & Configuration</h3>
+        <div style="background: white; padding: 28px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.06); max-width: 600px;">
+          <div class="form-group">
+            <label class="form-label">Business Name</label>
+            <input type="text" class="form-input" id="biz-name" placeholder="Your Company Name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">GSTIN</label>
+            <input type="text" class="form-input" id="biz-gst" placeholder="33AAAAA0000A1Z5">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="text" class="form-input" id="biz-phone" placeholder="+91 9876543210">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" id="biz-email" placeholder="business@example.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">City/Location</label>
+            <input type="text" class="form-input" id="biz-city" placeholder="COIMBATORE">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address</label>
+            <textarea class="form-input" id="biz-address" placeholder="Your business address" style="min-height: 80px;"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">PAN Number</label>
+              <input type="text" class="form-input" id="biz-pan" placeholder="BPKPG2004Q">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Challan Prefix</label>
+              <input type="text" class="form-input" id="challan-prefix" placeholder="CHN" value="CHN">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()" style="width: 100%; margin-bottom: 12px;">💾 Save Settings</button>
+          <button class="btn btn-danger" onclick="if(confirm('Delete ALL data?')) clearAllData()" style="width: 100%;">🗑️ Clear All Data</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS - All inline in HTML -->
+<div class="modal" id="challanModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Create Delivery Challan</h3>
+      <button class="modal-close" onclick="closeModal('challanModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Challan Number</label>
+        <input type="text" class="form-input" id="challan-number" readonly style="background: #f3f4f6;">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Challan Date</label>
+          <input type="date" class="form-input" id="challan-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Delivery Date (Optional)</label>
+          <input type="date" class="form-input" id="challan-delivery-date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bill To (Customer) *</label>
+        <select class="form-select" id="challan-customer">
+          <option>-- Select Customer --</option>
+        </select>
+      </div>
+
+      <h4 style="margin-top: 28px; margin-bottom: 18px; font-size: 16px; font-weight: 700; letter-spacing: -0.3px;">Items</h4>
+      <div class="items-section">
+        <div class="item-row-header">
+          <span>Item Name</span>
+          <span>Unit</span>
+          <span>Qty</span>
+          <span>Rate (₹)</span>
+          <span>Amount (₹)</span>
+          <span></span>
+        </div>
+        <div id="challan-items"></div>
+        <button type="button" class="btn btn-secondary" onclick="addChallanItem()" style="width: 100%; margin-top: 16px;">+ Add Item</button>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-row">
+          <span>Subtotal:</span><span id="challan-subtotal">₹0.00</span>
+        </div>
+        <div class="summary-total">
+          <span>Total:</span><span id="challan-total">₹0.00</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <textarea class="form-input" id="challan-notes" placeholder="Additional notes..." style="min-height: 70px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('challanModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveChallan()">Save Challan</button>
+      <button class="btn btn-success" onclick="saveAndPreviewChallan()">Save & Preview</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div class="modal" id="invoiceModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Create Invoice</h3>
+      <button class="modal-close" onclick="closeModal('invoiceModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Invoice Number</label>
+        <input type="text" class="form-input" id="inv-number" readonly style="background: #f3f4f6;">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Invoice Date</label>
+          <input type="date" class="form-input" id="inv-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Due Date</label>
+          <input type="date" class="form-input" id="inv-due">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Customer *</label>
+        <select class="form-select" id="inv-customer">
+          <option>-- Select Customer --</option>
+        </select>
+      </div>
+
+      <h4 style="margin-top: 28px; margin-bottom: 18px; font-size: 16px; font-weight: 700; letter-spacing: -0.3px;">Items</h4>
+      <div class="items-section">
+        <div class="item-row-header">
+          <span>Item Name</span>
+          <span>Unit</span>
+          <span>Qty</span>
+          <span>Rate (₹)</span>
+          <span>Amount (₹)</span>
+          <span></span>
+        </div>
+        <div id="inv-items"></div>
+        <button type="button" class="btn btn-secondary" onclick="addInvoiceItem()" style="width: 100%; margin-top: 16px;">+ Add Item</button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Discount (₹)</label>
+          <input type="number" class="form-input" id="inv-discount" value="0" onchange="calculateInvoiceTotal()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">GST %</label>
+          <select class="form-select" id="inv-gst" onchange="calculateInvoiceTotal()">
+            <option value="0">No GST</option>
+            <option value="5">5%</option>
+            <option value="12">12%</option>
+            <option value="18" selected>18%</option>
+            <option value="28">28%</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-row">
+          <span>Subtotal:</span><span id="inv-subtotal">₹0.00</span>
+        </div>
+        <div class="summary-row" style="color: var(--danger);">
+          <span>Discount:</span><span id="inv-disc-show">₹0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>GST:</span><span id="inv-gst-show">₹0.00</span>
+        </div>
+        <div class="summary-total">
+          <span>Total:</span><span id="inv-total">₹0.00</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="inv-status">
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="overdue">Overdue</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <textarea class="form-input" id="inv-notes" placeholder="Thank you for your business!" style="min-height: 70px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+      <button class="btn btn-success" onclick="saveAndPreviewInvoice()">Save & Preview</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ITEM MODAL -->
+<div class="modal" id="addItemModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Item</h3>
+      <button class="modal-close" onclick="closeModal('addItemModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Item Name *</label>
+        <input type="text" class="form-input" id="item-name" placeholder="e.g. Sensor Service">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" class="form-input" id="item-price" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <input type="text" class="form-input" id="item-unit" placeholder="hr, pcs, kg">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <input type="text" class="form-input" id="item-category" placeholder="Service, Spares, etc.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-input" id="item-desc" placeholder="Optional description" style="min-height: 70px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addItemModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal" id="uploadModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Upload Items from Excel</h3>
+      <button class="modal-close" onclick="closeModal('uploadModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background: #fffbeb; border-left: 5px solid var(--warning); padding: 14px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
+        <strong>📋 Excel Format Required:</strong><br>
+        Headers: Item Name | Price | Unit | Category | Description<br>
+        Example: Sensor Service | 2000 | hr | Service | Labour
+      </div>
+
+      <div style="border: 2px dashed var(--primary); border-radius: 12px; padding: 52px; text-align: center; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, var(--bg-accent) 0%, rgba(37,99,235,0.03) 100%);" id="upload-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+        <div style="font-size: 56px; margin-bottom: 16px;">📊</div>
+        <p style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Drag & drop Excel file or click to browse</p>
+        <small style="display: block; font-size: 13px; color: var(--text-secondary); margin-top: 10px;">Supports .xlsx, .xls, .csv</small>
+        <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="display: none;" onchange="handleFileSelect(event)">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('uploadModal')">Cancel</button>
+      <button class="btn btn-primary" id="import-btn" onclick="importExcel()" style="display: none;">✅ Import Items</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CUSTOMER MODAL -->
+<div class="modal" id="addCustomerModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Customer</h3>
+      <button class="modal-close" onclick="closeModal('addCustomerModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Name *</label>
+        <input type="text" class="form-input" id="cust-name" placeholder="Customer name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input type="tel" class="form-input" id="cust-phone" placeholder="+91 9876543210">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="cust-email" placeholder="customer@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">GST Number</label>
+        <input type="text" class="form-input" id="cust-gst" placeholder="33AAAAA0000A1Z5">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addCustomerModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHALLAN PREVIEW MODAL -->
+<div class="modal" id="challanPreviewModal">
+  <div class="modal-content" style="max-width: 950px;">
+    <div class="modal-header">
+      <h3>🖨️ Delivery Challan - Ready to Print/Download</h3>
+      <button class="modal-close" onclick="closeModal('challanPreviewModal')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 0; background: #eee;">
+      <div id="challan-preview-content" class="print-preview-container"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('challanPreviewModal')">Close</button>
+      <button class="btn btn-primary" onclick="printChallan()">🖨️ Print / Download as PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE PREVIEW MODAL -->
+<div class="modal" id="invoicePreviewModal">
+  <div class="modal-content" style="max-width: 950px;">
+    <div class="modal-header">
+      <h3>🖨️ Invoice - Ready to Print/Download</h3>
+      <button class="modal-close" onclick="closeModal('invoicePreviewModal')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 0; background: #eee;">
+      <div id="invoice-preview-content" class="print-preview-container"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('invoicePreviewModal')">Close</button>
+      <button class="btn btn-primary" onclick="printInvoice()">🖨️ Print / Download as PDF</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
